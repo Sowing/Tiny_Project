@@ -4,6 +4,7 @@ import pandas
 import numpy as np
 import flask
 from pandas import *
+import requests
 
 
 
@@ -29,17 +30,12 @@ def index():
         app.vars['Company_Name'] = request.form['ticker']
         if not app.vars['Company_Name']:
             return render_template('error.html')
-        '''
-        app.vars['Close'] = request.form['Close']
-        app.vars['Adj. Close'] = request.form['Adj. Close']        
-        app.vars['Open'] = request.form['Open']
-        app.vars['Adj. Open'] = request.form['Adj. Open']
-        '''
-        app.vars['features'] = request.form.getlist('features')
-        #print app.vars['Company_Name'],app.vars['features']
-        
+        app.vars['features'] = request.form.getlist('features')        
         Company_Name=app.vars['Company_Name']
         API_url='https://www.quandl.com/api/v3/datasets/WIKI/%s.csv?api_key=a5-JLQBhNfxLnwxfXoUE' % Company_Name
+        r = requests.get(API_url)
+        if r.status_code == 404:
+            return render_template('error.html')
         data = pd.read_csv(API_url,parse_dates=['Date'])
         Colors=["blue","green","yellow","red"]
         Color_index=0
@@ -73,7 +69,6 @@ def index():
         )
         return encode_utf8(html)
         
-       # return 'request.method was not a GET!'
 
 if __name__ == '__main__':
   app.run(port=33507)
